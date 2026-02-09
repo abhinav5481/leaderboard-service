@@ -45,18 +45,12 @@ public class BackgroundExpiryRunner {
         if (!running.compareAndSet(false, true)) return;
         scheduler.scheduleWithFixedDelay(
                 this::runOnce,
-                intervalSeconds,
+                0,
                 intervalSeconds,
                 TimeUnit.SECONDS
         );
     }
 
-    public void stop() {
-        running.set(false);
-        scheduler.shutdown();
-    }
-
-    /** Single run; can be called manually for tests or to trigger expiry once. */
     public void runOnce() {
         long now = System.currentTimeMillis() / 1000;
         repository.runExpiryCheck(now, handler);

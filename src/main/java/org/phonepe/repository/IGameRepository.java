@@ -11,8 +11,6 @@ public interface IGameRepository {
 
     List<String> getSupportedGameIds();
 
-    Game getOrCreateGame(String gameId);
-
     Game getOrCreateGame(String gameId, String gameName);
 
     Campaign createCampaign(String gameId, String gameName, String campaignName, CampaignType type, long startEpochSeconds, long endEpochSeconds);

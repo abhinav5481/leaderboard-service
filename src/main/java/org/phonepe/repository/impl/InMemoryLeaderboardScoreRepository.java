@@ -77,8 +77,6 @@ public class InMemoryLeaderboardScoreRepository implements ILeaderboardScoreRepo
         }
 
         void addScore(String userId, int score) {
-            if (userId == null || userId.isBlank()) throw new IllegalArgumentException("userId required");
-            if (score < 0 || score > MAX_SCORE) throw new IllegalArgumentException("score 0 to " + MAX_SCORE);
             ReentrantLock lock = stripes[stripeIndex(userId)];
             lock.lock();
             try {

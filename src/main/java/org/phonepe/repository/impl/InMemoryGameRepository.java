@@ -29,11 +29,6 @@ public class InMemoryGameRepository implements IGameRepository {
     }
 
     @Override
-    public Game getOrCreateGame(String gameId) {
-        return getOrCreateGame(gameId, null);
-    }
-
-    @Override
     public Game getOrCreateGame(String gameId, String gameName) {
         return gamesById.computeIfAbsent(gameId, k -> new Game(k, gameName));
     }
