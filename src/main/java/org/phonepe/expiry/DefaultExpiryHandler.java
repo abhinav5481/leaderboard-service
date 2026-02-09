@@ -3,13 +3,15 @@ package org.phonepe.expiry;
 import org.phonepe.model.Campaign;
 import org.phonepe.model.CampaignResult;
 import org.phonepe.model.ScoreEntry;
+import org.phonepe.repository.impl.InMemoryLeaderboardScoreRepository;
 
 import java.util.List;
-
 
 public class DefaultExpiryHandler implements ExpiryHandler {
 
     private static final DefaultExpiryHandler INSTANCE = new DefaultExpiryHandler();
+
+    private final InMemoryLeaderboardScoreRepository scoreRepository = InMemoryLeaderboardScoreRepository.getInstance();
 
     private DefaultExpiryHandler() {}
 
@@ -19,7 +21,7 @@ public class DefaultExpiryHandler implements ExpiryHandler {
 
     @Override
     public void onExpired(Campaign campaign, long expiredAtEpochSeconds) {
-        List<ScoreEntry> ranked = campaign.getRankedEntries();
+        List<ScoreEntry> ranked = scoreRepository.getRankedEntries(campaign.getId());
         String winnerUserId = null;
         int winnerScore = 0;
         if (!ranked.isEmpty()) {

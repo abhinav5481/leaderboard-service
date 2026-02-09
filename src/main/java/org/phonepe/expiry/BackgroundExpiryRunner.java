@@ -1,6 +1,6 @@
 package org.phonepe.expiry;
 
-import org.phonepe.repository.InMemoryGameRepository;
+import org.phonepe.repository.impl.InMemoryGameRepository;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;

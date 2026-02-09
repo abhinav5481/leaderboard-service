@@ -3,8 +3,6 @@ package org.phonepe.model;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.List;
-
 @Getter
 public class Campaign {
     private final String id;
@@ -13,7 +11,6 @@ public class Campaign {
     private final String gameId;
     private final long startEpochSeconds;
     private final long endEpochSeconds;
-    private final ScoreBoard scoreBoard;
     @Setter
     private volatile CampaignResult result;
 
@@ -28,7 +25,6 @@ public class Campaign {
         this.gameId = gameId;
         this.startEpochSeconds = startEpochSeconds;
         this.endEpochSeconds = endEpochSeconds;
-        this.scoreBoard = new ScoreBoard();
     }
 
     public boolean isActiveAt(long epochSeconds) {
@@ -37,21 +33,5 @@ public class Campaign {
 
     public boolean isExpired(long epochSeconds) {
         return epochSeconds > endEpochSeconds;
-    }
-
-    public void submitScore(String userId, int score) {
-        scoreBoard.addScore(userId, score);
-    }
-
-    public List<ScoreEntry> getRankedEntries() {
-        return scoreBoard.getRankedEntries();
-    }
-
-    public List<ScoreEntry> getPlayersAbove(String userId, int n) {
-        return scoreBoard.getPlayersAbove(userId, n);
-    }
-
-    public List<ScoreEntry> getPlayersBelow(String userId, int n) {
-        return scoreBoard.getPlayersBelow(userId, n);
     }
 }

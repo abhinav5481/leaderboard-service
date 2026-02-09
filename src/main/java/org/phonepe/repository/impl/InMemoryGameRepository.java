@@ -1,9 +1,10 @@
-package org.phonepe.repository;
+package org.phonepe.repository.impl;
 
 import org.phonepe.expiry.ExpiryHandler;
 import org.phonepe.model.Campaign;
 import org.phonepe.model.CampaignType;
 import org.phonepe.model.Game;
+import org.phonepe.repository.IGameRepository;
 
 import java.util.List;
 import java.util.Map;
