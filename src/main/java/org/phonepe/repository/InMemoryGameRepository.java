@@ -11,8 +11,16 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class InMemoryGameRepository implements IGameRepository {
 
+    private static final InMemoryGameRepository INSTANCE = new InMemoryGameRepository();
+
     private final Map<String, Game> gamesById = new ConcurrentHashMap<>();
     private final Map<String, Campaign> campaignsById = new ConcurrentHashMap<>();
+
+    private InMemoryGameRepository() {}
+
+    public static InMemoryGameRepository getInstance() {
+        return INSTANCE;
+    }
 
     @Override
     public List<String> getSupportedGameIds() {
@@ -21,7 +29,7 @@ public class InMemoryGameRepository implements IGameRepository {
 
     @Override
     public Game getOrCreateGame(String gameId) {
-        return getOrCreateGame(gameId, "DEFAULT");
+        return getOrCreateGame(gameId, null);
     }
 
     @Override

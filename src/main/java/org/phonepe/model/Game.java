@@ -25,9 +25,7 @@ public class Game {
         activeCampaigns.add(campaign);
     }
 
-    /**
-     * Returns campaigns currently active at the given time. No mutation; efficient for submit path.
-     */
+
     public synchronized List<Campaign> getActiveCampaigns(long epochSeconds) {
         List<Campaign> currentActive = new ArrayList<>();
         for (Campaign c : activeCampaigns) {
@@ -36,10 +34,6 @@ public class Game {
         return currentActive;
     }
 
-    /**
-     * Called by background expiry only: move expired campaigns to expired list and run handler
-     * (winner calculation, result storage, reward status PENDING).
-     */
     public synchronized void processExpiredCampaigns(long epochSeconds, ExpiryHandler handler) {
         List<Campaign> toExpire = new ArrayList<>();
         for (Campaign c : activeCampaigns) {

@@ -1,19 +1,28 @@
 package org.phonepe.service;
 
-import lombok.RequiredArgsConstructor;
 import org.phonepe.model.Campaign;
 import org.phonepe.model.CampaignResult;
 import org.phonepe.model.CampaignType;
 import org.phonepe.model.Game;
 import org.phonepe.model.ScoreEntry;
 import org.phonepe.repository.IGameRepository;
+import org.phonepe.repository.InMemoryGameRepository;
 
 import java.util.List;
 
-@RequiredArgsConstructor
 public class LeaderboardService implements ILeaderboardService {
 
+    private static final LeaderboardService INSTANCE = new LeaderboardService(InMemoryGameRepository.getInstance());
+
     private final IGameRepository repository;
+
+    private LeaderboardService(IGameRepository repository) {
+        this.repository = repository;
+    }
+
+    public static LeaderboardService getInstance() {
+        return INSTANCE;
+    }
 
     @Override
     public List<String> getSupportedGames() {
@@ -40,7 +49,11 @@ public class LeaderboardService implements ILeaderboardService {
     public void submitScore(String gameId, String userId, int score, long submittedAtEpochSeconds) {
         if (gameId == null || userId == null) throw new IllegalArgumentException("gameId and userId required");
         if (submittedAtEpochSeconds < 0) throw new IllegalArgumentException("submittedAtEpochSeconds must be >= 0");
-        Game game = repository.getOrCreateGame(gameId);
+        Game game = repository.getGame(gameId);
+        if (game == null){
+            System.out.println("No Game Found with gameId: "+gameId);
+            return;
+        }
         List<Campaign> active = game.getActiveCampaigns(submittedAtEpochSeconds);
         for (Campaign campaign : active) {
             campaign.submitScore(userId, score);
