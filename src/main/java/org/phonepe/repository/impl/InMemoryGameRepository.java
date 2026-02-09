@@ -6,9 +6,11 @@ import org.phonepe.model.CampaignType;
 import org.phonepe.model.Game;
 import org.phonepe.repository.IGameRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class InMemoryGameRepository implements IGameRepository {
 
@@ -16,6 +18,9 @@ public class InMemoryGameRepository implements IGameRepository {
 
     private final Map<String, Game> gamesById = new ConcurrentHashMap<>();
     private final Map<String, Campaign> campaignsById = new ConcurrentHashMap<>();
+    private final Map<String, List<Campaign>> activeByGameId = new ConcurrentHashMap<>();
+    private final Map<String, List<Campaign>> expiredByGameId = new ConcurrentHashMap<>();
+    private final Map<String, Object> locksByGameId = new ConcurrentHashMap<>();
 
     private InMemoryGameRepository() {}
 
@@ -38,7 +43,7 @@ public class InMemoryGameRepository implements IGameRepository {
         Game game = getOrCreateGame(gameId, gameName);
         String id = gameId + "::" + startEpochSeconds + "::" + endEpochSeconds;
         Campaign campaign = new Campaign(id, campaignName, type, gameId, startEpochSeconds, endEpochSeconds);
-        game.addCampaign(campaign);
+        activeByGameId.computeIfAbsent(gameId, k -> new CopyOnWriteArrayList<>()).add(campaign);
         campaignsById.put(id, campaign);
         return campaign;
     }
@@ -54,9 +59,35 @@ public class InMemoryGameRepository implements IGameRepository {
     }
 
     @Override
+    public List<Campaign> getActiveCampaigns(String gameId, long epochSeconds) {
+        List<Campaign> active = activeByGameId.get(gameId);
+        if (active == null) return List.of();
+        List<Campaign> currentActive = new ArrayList<>();
+        for (Campaign c : active) {
+            if (c.isActiveAt(epochSeconds)) currentActive.add(c);
+        }
+        return currentActive;
+    }
+
+    @Override
     public void runExpiryCheck(long epochSeconds, ExpiryHandler handler) {
-        for (Game game : gamesById.values()) {
-            game.processExpiredCampaigns(epochSeconds, handler);
+        for (String gameId : activeByGameId.keySet()) {
+            Object lock = locksByGameId.computeIfAbsent(gameId, k -> new Object());
+            List<Campaign> toExpire;
+            synchronized (lock) {
+                List<Campaign> active = activeByGameId.get(gameId);
+                if (active == null) continue;
+                toExpire = new ArrayList<>();
+                for (Campaign c : active) {
+                    if (c.isExpired(epochSeconds)) toExpire.add(c);
+                }
+                if (toExpire.isEmpty()) continue;
+                active.removeAll(toExpire);
+                expiredByGameId.computeIfAbsent(gameId, k -> new CopyOnWriteArrayList<>()).addAll(toExpire);
+            }
+            for (Campaign c : toExpire) {
+                handler.onExpired(c, epochSeconds);
+            }
         }
     }
 }

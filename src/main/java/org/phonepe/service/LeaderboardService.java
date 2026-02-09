@@ -85,7 +85,7 @@ public class LeaderboardService implements ILeaderboardService {
             if (submittedAtEpochSeconds < 0) throw new LeaderboardException(ErrorCode.INVALID_TIMESTAMP);
             Game game = repository.getGame(gameId);
             if (game == null) throw new LeaderboardException(ErrorCode.GAME_NOT_FOUND);
-            List<Campaign> active = game.getActiveCampaigns(submittedAtEpochSeconds);
+            List<Campaign> active = repository.getActiveCampaigns(gameId, submittedAtEpochSeconds);
             for (Campaign campaign : active) {
                 scoreRepository.addScore(campaign.getId(), userId, score);
             }
